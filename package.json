@@ -1,0 +1,27 @@
+{
+  "name": "430_api_prototype",
+  "version": "1.0.0",
+  "description": "Movie watch list API Prototope for project 1 ",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "pretest": "eslint ./src --fix",
+	"test": "echo \"Tests complete\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/uxc6625/MyMovieListAPIProject.git"
+  },
+  "author": "Ulijah Charles",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/uxc6625/MyMovieListAPIProject/issues"
+  },
+  "homepage": "https://github.com/uxc6625/MyMovieListAPIProject#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.14.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.16.0"
+  }
+}
