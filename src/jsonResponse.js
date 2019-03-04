@@ -1,5 +1,5 @@
 const users = []; // Object list of users
-let userNum = -1; // Starting number to determine number of users
+let userNum = -1; // Starting number
 
 // Stringifying an object from another function response
 const respondJSON = (request, response, status, object) => {
@@ -20,14 +20,13 @@ const getUsers = (request, response) => {
     users,
   };
 
-  // responseJSON.message = Object.values(users);
   return respondJSON(request, response, 200, responseJSON);
 };
 
 // Provide a list of users, HEAD request
 const headUsers = (request, response) => respondJSONMeta(request, response, 200);
 
-// Adding a user to the users object
+// Adding a user 
 const addUser = (request, response, body) => {
   userNum += 1;
 
@@ -36,7 +35,7 @@ const addUser = (request, response, body) => {
     message: 'Name and movie are required.',
   };
 
-    // If name and movie aren't provided, then request then to do so
+  // If name and movie aren't provided, then request then to do so
   if (!body.name || !body.movie) {
     responseJSON.id = 'missingParams';
     return respondJSON(request, response, 400, responseJSON);
@@ -45,15 +44,6 @@ const addUser = (request, response, body) => {
   let responseCode = 201;
 
   let index = userNum; // another variable linked to userNum
-
-  // Checking through the list if any other user name is similar to
-  // the one that is entered, then updating it
-  for (let i = 0; i < users.length; i++) {
-    if (users[i].name === body.name) {
-      responseCode = 204;
-      index = i;
-    }
-  }
   users[index] = {};
 
 
@@ -61,10 +51,12 @@ const addUser = (request, response, body) => {
   users[index].movie = body.movie;
   users[index].year = body.year;
   users[index].genre = body.genre;
+  users[index].image = body.image;
+
 
 
   if (responseCode === 201) {
-    responseJSON.message = 'Created Successfully';
+    responseJSON.message = `Added ${users[index].movie} for ${users[index].name}`;
     return respondJSON(request, response, responseCode, responseJSON);
   }
   return respondJSONMeta(request, response, responseCode);

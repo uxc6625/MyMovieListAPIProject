@@ -8,7 +8,7 @@ const htmlHandler = require('./htmlResponses.js'); // JS file to handle html res
 const jsonHandler = require('./jsonResponse.js'); // JS file to handle JSON responses
 
 // Port number
-const port = process.env.PORT || process.env.NODE_PORT || 3000;
+const port = process.env.PORT || process.env.NODE_PORT || 5500;
 
 // Handling the POST request
 const handlePost = (request, response, parsedURL) => {
@@ -43,7 +43,17 @@ const handleGet = (request, response, parsedUrl) => {
     jsonHandler.getUsers(request, response);
   } else if (parsedUrl.pathname === '/notReal') {
     jsonHandler.notFound(request, response);
-  } else {
+  }
+    else if (request.url === '/background.jpg') {
+      htmlHandler.getBackgroundImage(request,response);
+  } 
+  else if (request.url === '/logo.png') {
+    htmlHandler.getLogoImage(request,response);    
+} 
+else if (request.url === '/logo1.png') {
+  htmlHandler.getHeaderImage(request,response);    
+} 
+  else {
     htmlHandler.getIndex(request, response);
   }
 };
@@ -56,7 +66,17 @@ const handleHead = (request, response, parsedUrl) => {
     jsonHandler.headUsers(request, response);
   } else if (parsedUrl.pathname === '/notReal') {
     jsonHandler.notFound(request, response);
-  } else {
+  }
+  else if (request.url === '/background.jpg') {
+    htmlHandler.getBackgroundImage(request,response); 
+} 
+else if (request.url === '/logo.png') {
+  htmlHandler.getLogoImage(request,response); 
+} 
+else if (request.url === '/logo1.png') {
+  htmlHandler.getHeaderImage(request,response);    
+} 
+  else {
     htmlHandler.getIndex(request, response);
   }
 };
@@ -65,6 +85,7 @@ const handleHead = (request, response, parsedUrl) => {
 const onRequest = (request, response) => {
   const parsedUrl = url.parse(request.url);
 
+
   if (request.method === 'POST') {
     handlePost(request, response, parsedUrl);
   } else if (request.method === 'GET') {
@@ -72,6 +93,7 @@ const onRequest = (request, response) => {
   } else if (request.method === 'HEAD') {
     handleHead(request, response, parsedUrl);
   }
+
 };
 
 http.createServer(onRequest).listen(port);

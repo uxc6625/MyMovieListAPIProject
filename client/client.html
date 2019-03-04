@@ -1,9 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>MyMovieList</title>
-  <link rel="stylesheet" type="text/css" href="style.css">
+  <title>Movie Night Watch List</title>
   
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="style.css">
+    <meta charset="utf-8">
+    </head>
+   <body>
+    <section id="top">
+        <img src="logo1.png" alt="Smiley face" >
+      
+      <form id="nameForm" action="/addUser" method="post">
+        <label for="name">Users Name: </label>
+        <input id="nameField" type="text" name="name" />
+        <label for="movie">Movie: </label>
+        <input id="movieField" type="text" name="movie" />
+          <label for="year">Released: </label>
+          <input id="yearField" type="text" name="year" />
+          <label for="year">Genre: </label>
+          <input id="genreField" type="text" name="genre" />
+        <br><input id="add" type="submit" value="Add Movie" />
+      </form>
+        
+      <form id="userForm" action="/getUsers" method="get">
+        <input type="submit" value="List" />
+      </form>
+    </section>
+    <section id="content">
+    </section>
+    <section id="footer"><img src="logo.png" alt="Smiley face" >
+    </section>
+
+
+
+  </body>
+
+  <script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+    <script src="https://twitter.github.io/typeahead.js/releases/latest/typeahead.bundle.js"></script>
+    <script type="text/javascript">
+        // Code examples provided by typeahead.js and Bloodhound
+        
+        // Instantiate the Bloodhound suggestion engine (suggested by typeahead.js)
+        var movies = new Bloodhound({
+            datumTokenizer: function (datum) {
+                return Bloodhound.tokenizers.whitespace(datum.value);
+            },
+            queryTokenizer: Bloodhound.tokenizers.whitespace,
+            remote: {
+                // url example provided by TMDB and my own API key within it
+                url: 'http://api.themoviedb.org/3/search/movie?api_key=128881243043a86c04bec17358f0c678&query=%QUERY',
+                // whatever query string the user types
+                wildcard: '%QUERY',
+                filter: function (movies) {
+                    // Map the remote source JSON array to a JavaScript object array
+                    return $.map(movies.results, function (movie) {
+                        // returns information provided by whatever result the user inputted
+                        return {
+                            value: movie.original_title,
+                            year: movie.release_date,
+                            image: movie.poster_path
+                        };
+                    });
+                }
+            }
+        });
+        
+        // Initialize the Bloodhound suggestion engine
+        movies.initialize();
+
+        // Instantiate the Typeahead UI
+        $('#movieField').typeahead(null, {
+            // Use 'value' as the displayKey because the filter function
+            // returns suggestions in a javascript object with a variable called 'value'
+            displayKey: 'value',
+            source: movies.ttAdapter(),
+            templates: {
+                // If query string doesn't match any data, display this
+                empty: 'No movies',
+                // Display relevant information
+                suggestion: function(data) {
+                    return '<p style="background-color: white; color: black;">' + data.value + '</p>';
+                }
+            },
+            limit: 10,
+        });
+        
+        // Once the movie is selected, grab the release date info and put it as yearField's value
+        $('#movieField').on('typeahead:select', function (e, datum) {
+            document.querySelector("#yearField").value = datum.year;
+            //document.querySelector
+        });
+    </script>
+
+
+
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
   <script type="text/babel">
     // Parses JSON information from user object in jsonResponses
@@ -20,11 +112,39 @@
       
         // If the object has elements within it, append it to the content
       if(obj.users) {
-        const userList = document.createElement('p');
-        const users = JSON.stringify(obj.users);
-        userList.textContent = users;
-          console.dir(Object.keys(obj.users).length);
-        content.appendChild(userList);
+        var string = "<div class='card-columns'>";
+        
+        for (var i = 0; i < obj.users.length; i++) {
+          var name = obj.users[i].name;
+            var movie = obj.users[i].movie;
+            var year = obj.users[i].year;
+            var genre = obj.users[i].genre;
+            
+            // If there is no year input, then it is N/A
+            if (year === '') {
+                year = 'N/A';
+            }
+            // If there is no genre input, then it is N/A
+            if (genre === '') {
+                genre = 'N/A';
+            }
+            
+            string += "<div class='card'>";
+            string += "<h3>" + name + "</h3>";
+            string += "<div id='info'>";
+            string += "Movie: " + movie;
+            string += "<br> Year Released: " + year;
+            string += "<br> Genre: " + genre;
+            string += "</div>";
+            string += "</div>";
+            
+        }
+        
+        string += "</div>";
+        // Add string to innerhtml of content
+        document.querySelector('#content').innerHTML = string;
+        
+    }
     
     };
     
@@ -49,10 +169,9 @@
               break;
           }
         
-        // If 'GET' is selected then display all of the content
-        if (userForm.querySelector('#methodSelect').value === 'get'){
+      
             parseJSON(xhr, content);
-        }
+       
     };
 
     // Retrieving data from the html page and posting it
@@ -83,24 +202,13 @@
     // Function for sending a GET response
     const sendGet = (e, userForm) => {
         
-        // Determining the value of urlField
-        let action = {};
-        if (userForm.querySelector('#urlField').value == '/getUsers'){
-            action = '/getUsers';
-        } else {
-            action = '/notReal';
-        }
+       // Grabbing action and method from userForm
+       const getAction = userForm.getAttribute('action');
+        const getMethod = userForm.getAttribute('method');
         
-        // Determining the value of methodSelect
-        let method = {};
-        if (userForm.querySelector('#methodSelect').value === 'head') {
-            method = 'head';
-        } else {
-            method = 'get';
-        }
-    
+        
         const xhr = new XMLHttpRequest();
-        xhr.open(method, action);
+        xhr.open(getMethod, getAction);
         
         xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
       xhr.setRequestHeader ('Accept', 'application/json');
@@ -124,34 +232,4 @@
 
     window.onload = init;
   </script>
-</head>
-<body>
-  <section id="top">
-    <h3>MyMovieList</h3>
-    <form id="nameForm" action="/addUser" method="post">
-      <label for="name">Name: </label>
-      <input id="nameField" type="text" name="name" />
-        <br><label for="movie">Movie: </label>
-        <input id="movieField" type="text" name="movie" />
-        <br><label for="year">Year Released: </label>
-        <input id="yearField" type="number" name="year" />
-        <br><label for="year">Genre: </label>
-        <input id="genreField" type="text" name="genre" />
-      <br><input type="submit" value="Add User" />
-    </form>
-    <form id="userForm" action="/getUsers" method="get">
-      <select id='urlField'>
-        <option value='/getUsers'>/getUsers</option>
-        <option value='/notReal'>/notReal</option>
-      </select>
-      <select id="methodSelect">
-        <option value="get">GET</option>
-        <option value="head">HEAD</option>
-      </select>
-      <input type="submit" value="Get User" />
-    </form>
-  </section>
-  <section id="content">
-  </section>
-</body>
 </html>
